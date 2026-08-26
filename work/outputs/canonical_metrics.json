@@ -1,0 +1,49 @@
+{
+  "base_rate": 0.4386091473091906,
+  "overall_declining_rate": 0.5568764451593445,
+  "fair_baseline_precision_at_50": 0.64,
+  "random_forest_precision_at_50": 0.28,
+  "five_fold_mean_precision_at_50": 0.544,
+  "five_fold_std_precision_at_50": 0.199,
+  "model_vs_baseline_ratio": 0.43750000000000006,
+  "model_vs_random_ratio": 0.6383815789473685,
+  "feature_importance": {
+    "content_age_days": 0.24583306617333014,
+    "days_since_last_update": 0.4218075157679466,
+    "impressions_90d": 0.10254074114729651,
+    "ctr": 0.14748315496255937,
+    "avg_position": 0.0823355219488674
+  },
+  "model_config": {
+    "n_estimators": 100,
+    "max_depth": 8,
+    "random_state": 42,
+    "features": [
+      "content_age_days",
+      "days_since_last_update",
+      "impressions_90d",
+      "ctr",
+      "avg_position"
+    ]
+  },
+  "validation_config": {
+    "method": "client_holdout",
+    "split": "GroupKFold(n_splits=5)",
+    "train_size": 58783,
+    "test_size": 20793
+  },
+  "data_source": {
+    "kind": "huggingface_warehouse",
+    "release": "hf://datasets/FlyRank/internship-warehouse",
+    "feature_window": [
+      "2026-01-01",
+      "2026-03-01"
+    ],
+    "label_window": [
+      "2026-03-01",
+      "2026-05-01"
+    ],
+    "n_pages": 79576,
+    "n_clients": 26
+  }
+}

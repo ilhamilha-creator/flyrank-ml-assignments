@@ -1,0 +1,9 @@
+{
+  "baseline_impressions_median": 1005.0,
+  "baseline_avg_position_median": 7.774551367425199,
+  "baseline_ctr_median": 0.13908205841446453,
+  "baseline_declining_rate": 0.5568764451593445,
+  "precision_50_threshold": 0.8,
+  "drift_tolerance": 0.15,
+  "fp_rate_threshold": 0.3
+}

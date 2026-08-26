@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Refresh Prioritization — Machine Learning Research Paper</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #10b981;
+            --bg-light: #f8fafc;
+            --bg-soft: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.8;
+            color: var(--text-dark);
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary) !important;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary) !important;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--primary) !important;
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8rem 0 6rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .hero .badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        /* Cards */
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Chart Cards */
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            margin-bottom: 3rem;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-header h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .chart-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .chart-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-footer {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .chart-footer p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .chart-footer strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .chart-footer code {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: white;
+        }
+
+        /* Scroll Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-graph-up-arrow me-2"></i>
+                Content Refresh ML
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-journal-text me-1"></i>Overview
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#abstract"><i class="bi bi-file-text me-2"></i>Abstract</a></li>
+                            <li><a class="dropdown-item" href="#problem"><i class="bi bi-question-circle me-2"></i>Problem Framing</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-database me-1"></i>Data & Model
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#data"><i class="bi bi-shield-check me-2"></i>Data Safety</a></li>
+                            <li><a class="dropdown-item" href="#baseline"><i class="bi bi-rulers me-2"></i>Baseline</a></li>
+                            <li><a class="dropdown-item" href="#model"><i class="bi bi-cpu me-2"></i>Model/Analysis</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-graph-up me-1"></i>Results
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#evaluation"><i class="bi bi-bar-chart me-2"></i>Evaluation</a></li>
+                            <li><a class="dropdown-item" href="#interpretation"><i class="bi bi-lightbulb me-2"></i>Interpretation</a></li>
+                            <li><a class="dropdown-item" href="#results"><i class="bi bi-images me-2"></i>Charts</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-gear me-1"></i>Implementation
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#recommendations"><i class="bi bi-check-circle me-2"></i>Recommendations</a></li>
+                            <li><a class="dropdown-item" href="#reproducibility"><i class="bi bi-arrow-repeat me-2"></i>Reproducibility</a></li>
+                            <li><a class="dropdown-item" href="#limitations"><i class="bi bi-exclamation-triangle me-2"></i>Limitations</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#acknowledgments">
+                            <i class="bi bi-heart me-1"></i>Credits
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="mb-3">
+                        <span class="badge me-2">Machine Learning</span>
+                        <span class="badge me-2">Content Strategy</span>
+                        <span class="badge">Decision Support</span>
+                    </div>
+                    <h1>Content Refresh Prioritization Using Machine Learning</h1>
+                    <p>A data-driven approach to help content teams identify which declining pages actually need refresh before wasting editorial time on stable content.</p>
+                    <p class="small text-white-50">By ilhamilha-creator | 2026</p>
+                    <div class="d-flex gap-3">
+                        <a href="#results" class="btn btn-light btn-lg">
+                            <i class="bi bi-graph-up me-2"></i>View Results
+                        </a>
+                        <a href="#methodology" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Abstract Section -->
+    <section id="abstract" class="content-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="section-title">Abstract</h2>
+                    <p class="lead">Content teams managing large portfolios struggle to identify which declining pages actually need refresh before wasting editorial time on stable content. This work uses the FlyRank Hugging Face warehouse: 79,576 pages and 26 clients. Features are January–February 2026 search signals. The label is a next-month drop (April impressions below 80% of March).</p>
+                    <p>A fair hand-written rule reaches Precision@50 of 0.640 on client-holdout fold 1. A Random Forest on the same five features reaches 0.280 on that fold (one held-out client) and 0.544 across five folds, near the 0.557 declining rate. The forest does not beat the rule when the label sits in the future.</p>
+                    <p>The output is a ranked action queue with reason codes. This is decision-support for who to look at first, not a causal predictor of ranking improvements.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Framing Section -->
+    <section id="problem" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Problem Framing</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Decision Supported</h4>
+                            <p class="card-text">Which content pages should content editors prioritize for refresh to recover declining search performance?</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Unit of Analysis</h4>
+                            <p class="card-text">One unique content page (identified by <code>content_id</code>)</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Output</h4>
+                            <p class="card-text">Ranked priority queue with action labels and reason codes. Four labels are defined; on this warehouse run only CONTENT_REFRESH_PRIORITY (18,699 pages) and MONITOR_STABLE (60,877 pages) appeared.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Human Action</h4>
+                            <p class="card-text">Content editors review flagged pages in priority order, assess whether they actually need refresh, and execute updates on the most promising candidates</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Cost of Wrong Call</h4>
+                            <ul class="card-text">
+                                <li><strong>False positive:</strong> Editorial time wasted on stable pages that don't need refresh (~4 hours per page)</li>
+                                <li><strong>False negative:</strong> Missed opportunity to recover declining pages that could have been improved</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Why Data/ML Helps</h4>
+                            <p class="card-text">Random picking matches the declining rate (0.557). On this warehouse a fair hand-written rule is the stronger shortlist (Precision@50 0.640 on fold 1). The Random Forest did not beat that rule (0.280 on fold 1). The queue is still ranked decision-support with reason codes, not a claim that ML beats a transparent rule.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Safety Section -->
+    <section id="data" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Data Safety</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Data Source</h4>
+                            <p class="card-text">FlyRank Hugging Face warehouse <code>hf://datasets/FlyRank/internship-warehouse</code> — 79,576 pages, 26 clients after filters. Built with DuckDB over remote Parquet; cached to <code>work/outputs/warehouse_page_frame.parquet</code>.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Time Window</h4>
+                            <p class="card-text">Features: January–February 2026. Label: April impressions &lt; 80% of March impressions. Features do not overlap the April outcome month.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Grain</h4>
+                            <p class="card-text">One row per <code>client_hash_id</code> × <code>content_hash_id</code></p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Columns Deliberately Excluded</h4>
+                            <ul class="card-text">
+                                <li><code>trend_pct</code>: Label-derived feature computed from trend_direction, excluded to prevent leakage</li>
+                                <li>Product decision flags: health_score, priority_score, action_type, refresh_tier excluded to avoid learning existing system rules</li>
+                                <li>Client identifiers: <code>client_id</code> used only for grouped validation splits, never as features</li>
+                                <li>Content URLs and page titles: Excluded to maintain privacy and avoid overfitting to specific content</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Leakage Risks Considered</h4>
+                            <ul class="card-text">
+                                <li>Label-derived features: <code>trend_pct</code> deliberately tested and confirmed leaky (inflates performance by ~15%), excluded from final model</li>
+                                <li>Future window overlap: Jan–Feb features; April is the outcome month; March is the label baseline only</li>
+                                <li>Decision-derived features: No product flags or existing system scores used as inputs</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Privacy Confirmation</h4>
+                            <p class="card-text">No client names, URLs, raw queries, or private data appear in any work notebooks or outputs. All work uses anonymized identifiers only.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Baseline Section -->
+    <section id="baseline" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Baseline</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Hand-written Baseline Implementation</h4>
+                            <p class="card-text">The baseline combines three simple, transparent rules that any content strategist could implement without ML:</p>
+                            
+                            <h5 class="mt-4">Rule 1: Stale Visible Pages</h5>
+                            <p class="card-text">Pages with <code>days_since_last_update &gt;= 180</code> AND <code>impressions_90d &gt;= 500</code> are flagged. This identifies old content that still receives traffic.</p>
+                            
+                            <h5 class="mt-4">Rule 2: Position Decay Risk</h5>
+                            <p class="card-text">Pages with <code>avg_position &gt; 10</code> AND <code>content_age_days &gt;= 180</code> are flagged. This identifies older pages sitting past page one.</p>
+                            
+                            <h5 class="mt-4">Rule 3: Low Engagement</h5>
+                            <p class="card-text">Pages with <code>ctr &lt; 0.05</code> AND <code>impressions_90d &gt;= 1000</code> are flagged. This finds visible pages with very low CTR. The score does not use <code>trend_direction</code> or <code>trend_pct</code>.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Why It's a Fair Comparison</h4>
+                            <p class="card-text">This baseline represents human intuition about what makes a page "need refresh." It uses the same data split (client-holdout) and the same metric (Precision@50) as the model, ensuring apples-to-apples comparison. The baseline is intentionally simple—if ML can't beat human intuition, the system isn't useful.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Baseline Performance</h4>
+                            <p class="card-text">Precision@50 = 0.640 (32/50 pages correctly identified as declining) on the same client-holdout test set used for model evaluation. This is the fair rule from <code>w04_baseline_score.ipynb</code>. It does not use the label.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Stats -->
+    <section class="content-section bg-white">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">80K</div>
+                        <div class="stat-label">Warehouse Pages</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">0.64</div>
+                        <div class="stat-label">Fair Rule Precision@50</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">0.28</div>
+                        <div class="stat-label">Forest Fold-1 Precision@50</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Core Features</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Model Section -->
+    <section id="model" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Model / Analysis</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Method and Why It Fits the Lane</h4>
+                            <p class="card-text">Random Forest classifier with 100 trees and max_depth=8. This fits the Refresh lane because:</p>
+                            <ul class="card-text">
+                                <li>Handles non-linear relationships between content signals and decline patterns</li>
+                                <li>Provides feature importance scores for transparent explanations</li>
+                                <li>Robust to outliers and missing values (common in search data)</li>
+                                <li>Fast to train and predict for large content portfolios</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Exact Feature List</h4>
+                            <p class="card-text">Five core features used:</p>
+                            <ul class="card-text">
+                                <li><code>content_age_days</code>: How old the content is</li>
+                                <li><code>days_since_last_update</code>: How long since last modification</li>
+                                <li><code>impressions_90d</code>: Search visibility over 90 days</li>
+                                <li><code>ctr</code>: Click-through rate (engagement quality)</li>
+                                <li><code>avg_position</code>: Average search ranking position</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">What Was Left Out on Purpose</h4>
+                            <ul class="card-text">
+                                <li><code>trend_pct</code>: Label-derived, would leak target information</li>
+                                <li>Product flags: health_score, priority_score, action_type, refresh_tier</li>
+                                <li>Client-specific features: Would prevent generalization</li>
+                                <li>Content-specific features: URLs, titles, word counts (privacy + overfitting)</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Target Definition</h4>
+                            <p class="card-text">Positive class = April impressions &lt; 80% of March impressions. Features are January–February 2026, so the label is a next-month drop, not a same-window proxy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Evaluation Section -->
+    <section id="evaluation" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Evaluation</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Split Design</h4>
+                            <p class="card-text">Client-holdout validation using GroupKFold (5 folds). Pages from the same client never appear in both training and test sets, ensuring generalization to unseen clients. This mimics real-world deployment where the model will be applied to new clients.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Why This Split</h4>
+                            <p class="card-text">Grouped by client because different clients have different baseline performance, content strategies, and search visibility patterns. A simple random split would overestimate performance by memorizing client-specific patterns.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Metrics</h4>
+                            <p class="card-text">Primary metric: Precision@50 (precision in top 50 predicted declining pages). This matches the business use case—content teams will review the top N pages, so we care about precision in that set.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Model vs Baseline on Same Split</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Method</th>
+                                            <th>Precision@50</th>
+                                            <th>Improvement</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Fair hand-written rule</td>
+                                            <td>0.640</td>
+                                            <td>—</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Random Forest (fold 1)</td>
+                                            <td>0.280</td>
+                                            <td>0.44× the rule</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Random Forest (5-fold mean)</td>
+                                            <td>0.544</td>
+                                            <td>near 0.557 declining rate</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Test-fold base rate</td>
+                                            <td>0.439</td>
+                                            <td>fold 1 only</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <h4 class="card-title mb-3 mt-4">Error Analysis</h4>
+                            <p class="card-text">Fold 1 Precision@50 of 0.280 means 14 of the top 50 are in the declining class. The fair rule on the same fold is 32/50. That fold is one client (20,793 pages, base rate 0.439). Across five folds the forest mean is 0.544, near the 0.557 declining rate.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interpretation Section -->
+    <section id="interpretation" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Interpretation</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">What the Model Actually Found</h4>
+                            <p class="card-text">On the warehouse the forest leaned on freshness and age more than on impressions. That is a different pattern than the starter CSV, where impressions dominated. Fold-1 Precision@50 is still below the fair rule.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Feature Importances in Plain Words</h4>
+                            <ul class="card-text">
+                                <li><strong>days_since_last_update (42.2%):</strong> Time since last update is the strongest warehouse signal for the Apr-vs-Mar drop.</li>
+                                <li><strong>content_age_days (24.6%):</strong> Older pages are associated with the drop label more than freshness alone.</li>
+                                <li><strong>ctr (14.7%):</strong> Low engagement in Jan–Feb is a weaker but present signal.</li>
+                                <li><strong>impressions_90d (10.3%):</strong> Visibility matters less here than it did on the starter CSV.</li>
+                                <li><strong>avg_position (8.2%):</strong> Rank in the feature window is the smallest of the five.</li>
+                            </ul>
+                            
+                            <h4 class="card-title mb-3 mt-4">Surprises and Negative Results</h4>
+                            <p class="card-text">The fair hand-written rule reaches 0.640 Precision@50. The Random Forest reaches 0.280 on the same client-holdout fold (0.44× the rule). Five-fold mean is 0.544. This is a negative result on a future label: the forest does not beat the readable rule. High-impression pages can still dominate a ranked list, so a person has to skip evergreen, seasonal, and already-updated pages.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Well-Understood "No Effect"</h4>
+                            <p class="card-text">The model doesn't learn strong signals from some features we expected to matter (like engagement_rate or scroll_rate). This suggests that for this specific task (identifying declining pages), visibility and position matter more than engagement metrics—counterintuitive but valuable insight.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Model Performance Results</h2>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h4>Model Performance vs Baseline</h4>
+                    <span class="chart-badge">Figure 1</span>
+                </div>
+                <img src="charts/performance.png" alt="Precision@50: fair rule 0.640 beats forest fold-1 0.280">
+                <div class="chart-footer">
+                    <p><strong>Key Finding:</strong> On the Hugging Face warehouse, the fair rule (0.640 Precision@50) beats the Random Forest on fold 1 (0.280). Five-fold mean for the forest is 0.544, near the 0.557 declining rate. The starter CSV same-window proxy had made the forest look stronger. No claim that a rewrite recovers traffic.</p>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h4>Feature Importance Analysis</h4>
+                    <span class="chart-badge">Figure 2</span>
+                </div>
+                <img src="charts/top15.png" alt="Warehouse fold-1 feature importances, days_since_last_update first">
+                <div class="chart-footer">
+                    <p><strong>Top Features:</strong> On warehouse fold 1 the forest ranked <code>days_since_last_update</code> (0.422) first, then <code>content_age_days</code> (0.246), <code>ctr</code> (0.147), <code>impressions_90d</code> (0.103), and <code>avg_position</code> (0.082). Some <code>days_since_last_update</code> values are negative (update after the decision date).</p>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h4>Precision@K on fold 1</h4>
+                    <span class="chart-badge">Figure 3</span>
+                </div>
+                <img src="charts/precision_recall.png" alt="Precision@K: fair rule stays above base rate, forest stays below">
+                <div class="chart-footer">
+                    <p><strong>Precision@K:</strong> The reported metric is Precision@50, not a 0.5-threshold curve. On fold 1 the fair rule stays above the 0.439 base rate; the forest stays below it. The dotted line marks K=50 (rule 0.640, forest 0.280).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations Section -->
+    <section id="recommendations" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Recommendations</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">How Content Teams Should Use This</h4>
+                            <ol class="card-text">
+                                <li>Access the ranked playbook queue from <code>work/outputs/action_playbook_queue.csv</code></li>
+                                <li>Review top-priority pages first, focusing on the reason codes provided</li>
+                                <li>Assess whether flagged pages actually need refresh based on editorial judgment</li>
+                                <li>Execute updates on the most promising candidates</li>
+                                <li>Monitor performance changes over time to validate the system</li>
+                            </ol>
+                            
+                            <h4 class="card-title mb-3 mt-4">Confidence and Limits</h4>
+                            <p class="card-text"><strong>Confidence:</strong> Medium confidence in the model's predictions for high-visibility pages. Lower confidence for low-visibility pages where data is sparse.</p>
+                            <p class="card-text"><strong>Limits:</strong> This is decision-support, not automation. Content teams must manually review before acting. The model identifies patterns but doesn't guarantee refresh outcomes. Performance may degrade over time as content strategies and search algorithms change.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Ranked Actions Supported</h4>
+                            <ul class="card-text">
+                                <li><strong>CONTENT_REFRESH_PRIORITY:</strong> 18,699 pages (23.5%). High out-of-fold model score and visible in search. Review these first.</li>
+                                <li><strong>CONTENT_REFRESH_MODERATE:</strong> 0 pages on this warehouse run. Rule still exists: old pages that still get traffic, not already in priority.</li>
+                                <li><strong>MONITOR_STABLE:</strong> 60,877 pages (76.5%). Leave these unless a human has another reason.</li>
+                                <li><strong>REVIEW_THRESHOLD:</strong> 0 pages on this warehouse run. Rule still exists: impressions_90d &lt; 50.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reproducibility Section -->
+    <section id="reproducibility" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Reproducibility</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">Exact Commands to Re-run Everything</h4>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <code class="text-dark">
+                                        git clone https://github.com/ilhamilha-creator/flyrank-ml-assignments.git<br>
+                                        cd flyrank-ml-assignments<br>
+                                        pip install pandas numpy scikit-learn matplotlib jupyter<br>
+                                        jupyter notebook work/notebooks/
+                                    </code>
+                                </div>
+                            </div>
+                            
+                            <h4 class="card-title mb-3 mt-4">Run Notebooks in Order</h4>
+                            <ol class="card-text">
+                                <li><code>work/notebooks/w01_research_question.ipynb</code></li>
+                                <li><code>work/notebooks/w02_ml_task_framing.ipynb</code></li>
+                                <li><code>work/notebooks/w03_data_contract.ipynb</code></li>
+                                <li><code>work/notebooks/w04_baseline_score.ipynb</code></li>
+                                <li><code>work/notebooks/w05_model.ipynb</code></li>
+                                <li><code>work/notebooks/w06_validation_audit.ipynb</code></li>
+                                <li><code>work/notebooks/w07_action_playbook.ipynb</code></li>
+                                <li><code>work/notebooks/capstone.ipynb</code></li>
+                            </ol>
+                            
+                            <h4 class="card-title mb-3 mt-4">Random Seeds</h4>
+                            <p class="card-text">All models use <code>random_state=42</code> for reproducibility. The GroupKFold split uses the same seed to ensure consistent train/test splits across runs.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Environment</h4>
+                            <p class="card-text">Python 3.x with pandas, numpy, scikit-learn, matplotlib, jupyter. No special dependencies beyond standard data science stack.</p>
+                            
+                            <h4 class="card-title mb-3 mt-4">Output Files</h4>
+                            <ul class="card-text">
+                                <li><code>work/outputs/baseline_action_score.csv</code>: Fair-rule ranked queue (Week 4)</li>
+                                <li><code>work/outputs/action_playbook_queue.csv</code>: Model playbook queue (Week 7)</li>
+                                <li><code>work/outputs/action_playbook_baseline_metrics.json</code>: Monitoring baseline metrics</li>
+                                <li><code>work/capstone_report.md</code>: Complete research report</li>
+                                <li><code>work/presentation.md</code>: Presentation for ML-12</li>
+                                <li><code>docs/paper/charts/</code>: Paper charts from <code>work/scripts/generate_paper_charts.py</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Limitations Section -->
+    <section id="limitations" class="content-section">
+        <div class="container">
+            <h2 class="section-title">Limitations</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h4 class="card-title mb-3">What This Work Cannot Claim</h4>
+                            <ul class="card-text">
+                                <li>No causal claims about ranking improvements—the model identifies observed decline patterns, not guaranteed refresh outcomes</li>
+                                <li>This is decision-support, not automation—content teams must manually review before acting</li>
+                                <li>Human review guardrails required for core brand pages, legal/compliance content, and highly seasonal content</li>
+                                <li>Monitoring and retraining needed as data drifts over time</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acknowledgments Section -->
+    <section id="acknowledgments" class="content-section bg-white">
+        <div class="container">
+            <h2 class="section-title">Acknowledgments & Data Credit</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <p class="card-text">Built on the FlyRank Hugging Face internship warehouse from <a href="https://flyrank.ai" target="_blank">FlyRank</a>. Token access is via <code>HF_TOKEN</code> in <code>.env</code>; the token is never printed. Querying uses DuckDB over <code>hf://datasets/FlyRank/internship-warehouse</code>.</p>
+                            <p class="card-text mt-3"><strong>Repository:</strong> <a href="https://github.com/ilhamilha-creator/flyrank-ml-assignments" target="_blank">https://github.com/ilhamilha-creator/flyrank-ml-assignments</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <p class="mb-0">
+                        <a href="https://github.com/ilhamilha-creator/flyrank-ml-assignments" target="_blank">
+                            <i class="bi bi-github me-2"></i>GitHub Repository
+                        </a>
+                    </p>
+                    <p class="mt-3 text-muted">© 2025 FlyRank ML Internship Track</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scroll Animation Script -->
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Active navigation on scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        // Update sections list for scroll spy
+        const sectionIds = ['abstract', 'problem', 'data', 'baseline', 'model', 'evaluation', 'interpretation', 'recommendations', 'reproducibility', 'limitations', 'acknowledgments'];
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const href = link.getAttribute('href');
+                if (href && href.substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

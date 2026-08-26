@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone Report — Refresh / Content Opportunity Scoring</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --accent: #0ea5e9;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --text: #0f172a;
+            --text-light: #475569;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-label {
+            font-weight: 500;
+            opacity: 0.7;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            padding: 1rem 0;
+            margin-bottom: 3rem;
+        }
+
+        nav ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: var(--bg-alt);
+            color: var(--primary);
+        }
+
+        /* Content */
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 100px;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--text);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        /* Abstract */
+        .abstract {
+            background: linear-gradient(135deg, var(--bg-alt) 0%, #e0f2fe 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: var(--bg-alt);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .info-box strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+            color: var(--text-light);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Code blocks */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-alt);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9em;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-alt);
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Blockquote */
+        blockquote {
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: var(--bg-alt);
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        /* Metrics highlight */
+        .metrics-highlight {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Feature list */
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-item {
+            background: var(--bg-alt);
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .feature-item code {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Recommendation steps */
+        .recommendation-steps {
+            counter-reset: step;
+        }
+
+        .recommendation-steps > li {
+            counter-increment: step;
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendation-steps > li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-alt);
+            padding: 3rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.75rem;
+            }
+
+            .meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            nav ul {
+                gap: 0.25rem;
+            }
+
+            nav a {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            nav {
+                display: none;
+            }
+
+            header {
+                background: white;
+                color: black;
+                padding: 2rem 0;
+            }
+
+            .abstract {
+                background: white;
+                border: 1px solid var(--border);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Capstone Report — Refresh / Content Opportunity Scoring</h1>
+            <div class="meta">
+                <div class="meta-item">
+                    <span class="meta-label">Author:</span>
+                    <span>Ilham EL-BARAKA</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Lane:</span>
+                    <span>Refresh / Content Opportunity Scoring</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Repo:</span>
+                    <span>flyrank-ml-assignments</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Date:</span>
+                    <span>August 2026</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="paper/index.html">Full paper</a></li>
+                <li><a href="#abstract">Abstract</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#recommendation">Recommendation</a></li>
+                <li><a href="#acknowledgments">Acknowledgments</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="abstract">
+            <div class="abstract">
+                <p>Content teams with large portfolios need a short list of pages to review for refresh, instead of guessing. This work uses the FlyRank Hugging Face warehouse: 79,576 pages, 26 clients. Features are January–February 2026 search signals. The label is a next-month drop (April impressions &lt; 80% of March). A fair hand-written rule reaches Precision@50 of 0.640 on client-holdout fold 1. A Random Forest on the same five features reaches 0.280 on that fold (five-fold mean 0.544). The output is a ranked queue with reason codes. It is decision-support for who to look at first, not a claim that a rewrite will move rank.</p>
+                <p>The full nine-section paper, with charts, is at <a href="paper/index.html">docs/paper/index.html</a>. The markdown report is <code>work/capstone_report.md</code>.</p>
+            </div>
+        </section>
+
+        <section id="results">
+            <h2>Headline numbers</h2>
+            <div class="metrics-highlight">
+                <div class="metric-card">
+                    <div class="metric-value">0.640</div>
+                    <div class="metric-label">Fair rule Precision@50 (fold 1)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.280</div>
+                    <div class="metric-label">Forest Precision@50 (fold 1)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.439</div>
+                    <div class="metric-label">Test-fold base rate</div>
+                </div>
+            </div>
+            <p>On this warehouse future label the forest does not beat the fair rule. Five-fold mean for the forest is 0.544, near the 0.557 declining rate. Importances: <code>days_since_last_update</code> 0.422, then age, then CTR.</p>
+            <img src="paper/charts/performance.png" alt="Precision@50 warehouse comparison" style="width:100%;border-radius:8px;margin:1rem 0;">
+        </section>
+
+        <section id="recommendation">
+            <h2>What to do</h2>
+            <ol class="recommendation-steps">
+                <li>Start with CONTENT_REFRESH_PRIORITY (18,699 pages on this run): high out-of-fold forest score and visible in search.</li>
+                <li>Leave MONITOR_STABLE (60,877 pages) unless a person has another reason.</li>
+                <li>STALE_VISIBLE and REVIEW_THRESHOLD were empty on this warehouse run.</li>
+                <li>A person still checks seasonality, brand/legal pages, and crawl errors before anything ships.</li>
+            </ol>
+        </section>
+
+        <section id="acknowledgments">
+            <h2>Acknowledgments &amp; data credit</h2>
+            <p>Built on the FlyRank ML Internship warehouse. Data provided by <a href="https://flyrank.ai" target="_blank">FlyRank</a>. IDs are hashes. No private URLs, client names, or raw queries.</p>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Built on the FlyRank ML Internship dataset. Data provided by <a href="https://flyrank.ai" target="_blank">FlyRank</a>.</p>
+            <p><a href="paper/index.html">Open the full research paper</a></p>
+        </div>
+    </footer>
+</body>
+</html>

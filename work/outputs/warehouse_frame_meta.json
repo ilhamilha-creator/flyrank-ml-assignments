@@ -1,0 +1,16 @@
+{
+  "rows": 79576,
+  "clients": 26,
+  "feature_window": [
+    "2026-01-01",
+    "2026-03-01"
+  ],
+  "label_window": [
+    "2026-03-01",
+    "2026-05-01"
+  ],
+  "label_rule": "down if Apr impressions < 0.8 * Mar impressions",
+  "declining_rate": 0.5568764451593445,
+  "source": "hf://datasets/FlyRank/internship-warehouse",
+  "cache": "work\\outputs\\warehouse_page_frame.parquet"
+}
